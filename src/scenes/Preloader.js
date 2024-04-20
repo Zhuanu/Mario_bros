@@ -7,7 +7,7 @@ export class Preloader extends Scene {
 
     init() {
         //  We loaded this image in our Boot Scene, so we can display it here
-        this.add.image(512, 384, 'preloader');
+        this.add.image(this.game.config.width/2, this.game.config.height/2, 'preloader');
     }
 
     preload() {

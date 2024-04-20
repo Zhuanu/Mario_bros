@@ -16,7 +16,7 @@ export class MainMenu extends Scene
 
         const textStyle = { fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff', stroke: '#000000', strokeThickness: 8 };
 
-        this.add.image(512, 384, 'background');
+        this.add.image(this.game.config.width/2, this.game.config.height/2, 'background');
 
         const logo = this.add.image(420, -270, 'logo');
 

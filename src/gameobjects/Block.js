@@ -1,6 +1,8 @@
 export class Block extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y, type) {
-        super(scene, x, y, 'blocks', type);
+        super(scene, x, y, "tiles");
+        this.setup(type);
+        this.setOrigin(0, 0);
 
         // Ajouter l'objet à la scène
         scene.add.existing(this);
@@ -12,23 +14,33 @@ export class Block extends Phaser.Physics.Arcade.Sprite {
 
     // Méthode pour initialiser ou reconfigurer le bloc
     setup(type) {
-        // Configuration supplémentaire basée sur le type si nécessaire
+        this.blockType = type;
+        switch (type) {
+            case 'breakable':
+                // choisi le sprite de la brique cassable
+                this.setFrame(2);
+                this.breakable = true;
+                break;
+            case 'question':
+                // choisi le sprite de la brique question
+                this.setFrame(24);
+                this.breakable = false;
+                break;
+            default:
+                this.setFrame(0);
+                this.breakable = false;
+                break;
+        }
     }
-
-    preload() {
-        this.load.spritesheet('blocks', 'assets/img/blocksSpritesheet.png', {
-            frameWidth: 32,
-            frameHeight: 32
-        });
-        this.load.json('backgroundSprites', 'assets/sprites/backgroundSprites.json');
+    
+    hitByPlayer() {
+        if (this.breakable) {
+            this.destroy(); // Détruire le bloc si cassable
+        } else if (this.blockType === 'question') {
+            // Logique pour libérer un power-up ou des pièces
+            this.emit('activate', this);
+        }
     }
-
-    create() {
-        const blockData = this.cache.json.get('backgroundSprites');
-        blockData.forEach(data => {
-            const block = new Block(this, data.x, data.y, data.type);
-            block.setup(data.type);
-        });
-    }
+    
     
 }
