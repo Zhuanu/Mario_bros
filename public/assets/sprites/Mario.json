@@ -1,0 +1,145 @@
+{
+    "spriteSheetURL": "./img/characters.gif",
+    "type":"character",
+    "size":[16,16],
+    "sprites":[
+        {
+            "name":"mario_idle",
+            "scalefactor":2,
+            "colorKey":-1,
+            "collision":false,
+            "start": 14,
+            "end": 14,
+            "frameRate": 10,
+            "repeat": 0
+        },
+        {
+            "name":"mario_idle2",
+            "scalefactor":2,
+            "colorKey":-1,
+            "collision":false,
+            "start": 13,
+            "end": 13,
+            "frameRate": 10,
+            "repeat": 0
+        },
+        {
+            "name":"mario_run",
+            "scalefactor":2,
+            "colorKey":-1,
+            "collision":false,
+            "start": 16,
+            "end": 18,
+            "frameRate": 12,
+            "repeat": 0
+        },
+        {
+            "name":"mario_run2",
+            "scalefactor":2,
+            "colorKey":-1,
+            "collision":false,
+            "start": 11,
+            "end": 9,
+            "frameRate": 12,
+            "repeat": 0
+        },
+        {
+            "name":"mario_break",
+            "x":337,
+            "y":44,
+            "scalefactor":2,
+            "colorKey":-1,
+            "collision":false
+        },
+        {
+            "name":"mario_jump",
+            "scalefactor":2,
+            "colorKey":-1,
+            "collision":false,
+            "start": 20,
+            "end": 20,
+            "frameRate": 3,
+            "repeat": 0
+        },
+        {
+            "name":"mario_jump2",
+            "scalefactor":2,
+            "colorKey":-1,
+            "collision":false,
+            "start": 7,
+            "end": 7,
+            "frameRate": 3,
+            "repeat": 0
+        },
+        {
+            "name":"mario_dead",
+            "x":355,
+            "y":44,
+            "scalefactor":2,
+            "colorKey":-1,
+            "collision":false
+
+        },
+        {
+            "name":"mario_big_idle",
+            "x":259,
+            "y":1,
+            "scalefactor":2,
+            "colorKey":-1,
+            "collision":false,
+            "xsize":16,
+            "ysize":32
+        },
+        {
+            "name":"mario_big_run1",
+            "x":296,
+            "y":1,
+            "scalefactor":2,
+            "colorKey":-1,
+            "collision":false,
+            "xsize":16,
+            "ysize":32
+        },
+        {
+            "name":"mario_big_run2",
+            "x":315,
+            "y":1,
+            "scalefactor":2,
+            "colorKey":-1,
+            "collision":false,
+            "xsize":16,
+            "ysize":32
+        },
+        {
+            "name":"mario_big_run3",
+            "x":332,
+            "y":1,
+            "scalefactor":2,
+            "colorKey":-1,
+            "collision":false,
+            "xsize":16,
+            "ysize":32
+        },
+        {
+            "name":"mario_big_jump",
+            "x":369,
+            "y":1,
+            "scalefactor":2,
+            "colorKey":-1,
+            "collision":false,
+            "xsize":16,
+            "ysize":32
+        },
+        {
+            "name":"mario_big_break",
+            "x":369,
+            "y":1,
+            "scalefactor":2,
+            "colorKey":-1,
+            "collision":false,
+            "xsize":16,
+            "ysize":32
+        }
+    ]
+}
+
