@@ -1,5 +1,5 @@
 export class Block extends Phaser.Physics.Arcade.Sprite {
-    constructor(scene, x, y, type) {
+    constructor(scene, x, y, type, object) {
         super(scene, x, y, "tiles");
         this.setup(type);
         this.setOrigin(0, 0);
@@ -16,14 +16,32 @@ export class Block extends Phaser.Physics.Arcade.Sprite {
     setup(type) {
         this.blockType = type;
         switch (type) {
-            case 'breakable':
-                // choisi le sprite de la brique cassable
+            case 'brick':
                 this.setFrame(2);
                 this.breakable = true;
                 break;
-            case 'question':
-                // choisi le sprite de la brique question
+            case 'coinBox':
                 this.setFrame(24);
+                this.breakable = false;
+                break;
+            case 'randomBox':
+                this.setFrame(24);
+                this.breakable = false;
+                break;
+            case 'pipe_1':
+                this.setFrame(264);
+                this.breakable = false;
+                break;
+            case 'pipe_2':
+                this.setFrame(265);
+                this.breakable = false;
+                break;
+            case 'pipe_3':
+                this.setFrame(297);
+                this.breakable = false;
+                break;
+            case 'pipe_4':
+                this.setFrame(298);
                 this.breakable = false;
                 break;
             default:
@@ -33,14 +51,17 @@ export class Block extends Phaser.Physics.Arcade.Sprite {
         }
     }
     
-    hitByPlayer() {
-        if (this.breakable) {
-            this.destroy(); // Détruire le bloc si cassable
-        } else if (this.blockType === 'question') {
-            // Logique pour libérer un power-up ou des pièces
-            this.emit('activate', this);
-        }
+    hitByPlayer(player) {
+        if (player.y > this.y + this.scene.caseSize) {
+            if (this.breakable) {
+                this.destroy();
+            } else if (this.blockType === 'coinBox') {
+                this.setFrame(3);
+            } else if (this.blockType === 'randomBox') {
+                this.setFrame(3);
+            }
+        } 
+        
     }
-    
-    
+
 }

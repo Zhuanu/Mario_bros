@@ -4,13 +4,19 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
-        this.setBounce(0.1);
-        this.setCollideWorldBounds(true);
+        this.speed = 460;
+        this.jump = 575;
+        this.bigJump = 675;
+        this.setBounce(0);
+        this.setGravityY(800);
 
         // Charger les animations à partir du fichier JSON
         this.loadAnimations(scene);
         this.cursors = scene.input.keyboard.createCursorKeys();
         this.direction = 'right';
+
+        this.jumpTimer = 0; // Timer pour mesurer la durée de maintien de la touche de saut
+        this.isJumping = false; // Indicateur de saut en cours
     }
 
     loadAnimations(scene) {
@@ -29,35 +35,56 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     update() {
         this.setVelocityX(0);
 
-        // Déterminer la direction
-        if (this.cursors.left.isDown) {
-            this.setVelocityX(-160);
-            if (this.body.touching.down) this.anims.play('mario_run2', true);
-            this.direction = 'left';
-        } else if (this.cursors.right.isDown) {
-            this.setVelocityX(160);
-            if (this.body.touching.down) this.anims.play('mario_run', true);
-            this.direction = 'right';
-        } else {
-            // Gérer les animations en fonction de l'état du personnage
-            if (this.body.touching.down) {
-                if (this.cursors.space.isDown) {
-                    this.setVelocityY(-330);
-                    this.playJumpAnimation();
-                } else {
-                    this.playIdleAnimation();
-                }
+        if (this.body.touching.down) {
+            // Déterminer la direction
+            if (this.cursors.left.isDown) {
+                this.setVelocityX(-this.speed);
+                this.anims.play('mario_run2', true);
+                this.direction = 'left';
+            } else if (this.cursors.right.isDown) {
+                this.setVelocityX(this.speed);
+                this.anims.play('mario_run', true);
+                this.direction = 'right';
             } else {
+                this.playIdleAnimation();
+            }
+
+            // Sauter
+            if (this.cursors.space.isDown) {
+                this.isJumping = true;
+                this.jumpTimer = 0;
+                this.setVelocityY(-this.jump);
                 this.playJumpAnimation();
             }
-        } 
-        
-        if (this.body.touching.down) {
-            if (this.cursors.space.isDown) {
-                this.setVelocityY(-330);
-                this.playJumpAnimation();
+        } else {
+
+            // Déterminer la direction
+            if (this.cursors.left.isDown) {
+                this.setVelocityX(-this.speed / 1.5);
+                if (this.isJumping)
+                    this.anims.play('mario_jump2', true);
+                else 
+                    this.anims.play('mario_idle2', true)
+                this.direction = 'left';
+            } else if (this.cursors.right.isDown) {
+                this.setVelocityX(this.speed / 1.5);
+                if (this.isJumping)
+                    this.anims.play('mario_jump', true);
+                else 
+                    this.anims.play('mario_idle', true)
+                this.direction = 'right';
+            }
+
+            this.playJumpAnimation();
+            if (this.cursors.space.isDown && this.isJumping) {
+                this.jumpTimer++;
+                if (this.jumpTimer > 25) {
+                    this.setVelocityY(-this.bigJump);
+                    this.isJumping = false;
+                }
             }
         }
+        
     }
 
     playJumpAnimation() {

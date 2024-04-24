@@ -1,5 +1,5 @@
 {
-    "spriteSheetURL": "./img/koopas.png",
+    "spriteSheetURL": "./img/monsters.png",
     "type":"character",
     "size":[17,32],
     "sprites":[
