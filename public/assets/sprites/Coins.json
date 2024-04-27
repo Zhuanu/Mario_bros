@@ -1,0 +1,16 @@
+{
+    "spriteSheetURL": "./img/items.png",
+    "type":"coin",
+    "size":[64,64],
+    "sprites":[
+        {
+            "name":"coin",
+            "colorKey":-1,
+            "collision":false,
+            "start": 253,
+            "end": 256,
+            "frameRate": 10,
+            "repeat": 0
+        }
+    ]
+}

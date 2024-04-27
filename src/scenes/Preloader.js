@@ -14,15 +14,11 @@ export class Preloader extends Scene {
         this.load.setPath('assets');
 
         this.load.image('background', 'background.png');
-        this.load.atlas('logo', 'img/title_screen.png', 'sprites/Logo.json');
+        this.load.image('logo', 'img/title_screen.png');
+        this.load.bitmapFont('MarioFont', 'marioFont.png', 'marioFont.fnt');
     }
 
     create() {
-
-        let logo = this.add.sprite(0, 0, 'logo', 'SuperMarioBrosLogo');
-        logo.frame.cutWidth *= 2.5;
-        logo.frame.cutHeight *= 2.5;
-
         // Faire tomber le logo
         this.scene.transition({
             target: 'MainMenu',

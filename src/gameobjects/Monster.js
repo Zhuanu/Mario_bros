@@ -1,6 +1,6 @@
 export class Monster extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y, type) {
-        super(scene, x, y, "monsters"); // "monsters" est le nom de la feuille de sprite pour les monstres
+        super(scene, x, y, "monsters");
         this.setup(type);
         this.setOrigin(0, 0);
 
@@ -9,7 +9,7 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
         scene.physics.add.existing(this);
 
         // Configurer la physique du monstre
-        this.velocity = 160;
+        this.velocity = -160;
         this.setVelocityX(this.velocity);
         this.anims.play('goomba-walk', true);
     }
@@ -34,20 +34,22 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
 
     loadGoombaAnimations(scene) {
         // Créer une animation de marche pour le Goomba
-        scene.anims.create({
-            key: 'goomba-walk',
-            frames: [
-                { key: 'monsters', frame: 0 },
-                { key: 'monsters', frame: 1 }
-            ],
-            frameRate: 10,
-            repeat: -1
-        });
+        if (!scene.anims.exists('goomba-walk')) {
+            scene.anims.create({
+                key: 'goomba-walk',
+                frames: [
+                    { key: 'monsters', frame: 0 },
+                    { key: 'monsters', frame: 1 }
+                ],
+                frameRate: 10,
+                repeat: -1
+            });
+        }
     }
 
     hitByPlayer(player) {
         // Vérifier si la collision se produit par le haut du monstre
-        if (player.body.touching.down && player.y < this.y) {   
+        if (this.body.touching.up) {   
             this.setVelocityX(0);
             this.anims.stop();
             this.setFrame(2);
@@ -55,10 +57,14 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
             // Faire sauter le joueur
             player.setVelocityY(-player.jump);
 
+            this.scene.addScore(100);
+
             // Faire disparaître le monstre après un court délai
             this.scene.time.delayedCall(400, () => {
                 this.destroy();
             }, [], this);
+        } else {
+            player.handlePlayerHit();
         }
     }
 

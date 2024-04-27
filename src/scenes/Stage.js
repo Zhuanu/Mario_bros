@@ -11,7 +11,12 @@ export class Stage extends Phaser.Scene {
         this.blocks = [];
         this.monsters = [];
         this.items = [];
+        this.coins = [];
         this.backgroundObjects = [];
+
+        this.addScore = this.addScore.bind(this);
+        this.addCoin = this.addCoin.bind(this);
+        this.addLives = this.addLives.bind(this);
     }
 
     preload() {
@@ -19,6 +24,7 @@ export class Stage extends Phaser.Scene {
         this.load.json('levelData', 'assets/levels/Level1-1.json');
 
         this.load.image('stage', 'assets/background_stage.png');
+        this.load.image('backgroundObjects', 'assets/img/backgroundObjects.png');
 
         this.load.spritesheet('tiles', 'assets/img/tiles.png', {
             frameWidth: 64,
@@ -26,13 +32,13 @@ export class Stage extends Phaser.Scene {
         });
         this.load.spritesheet('mario', 'assets/img/characters.png', {
             frameWidth: 64,
-            frameHeight: 64
+            frameHeight: 128
         }); 
         this.load.spritesheet('monsters', 'assets/img/monsters.png', {
             frameWidth: 64,
             frameHeight: 64
         });
-        this.load.spritesheet('items', 'assets/img/monsters.png', {
+        this.load.spritesheet('items', 'assets/img/items.png', {
             frameWidth: 64,
             frameHeight: 64
         });
@@ -46,11 +52,21 @@ export class Stage extends Phaser.Scene {
     create() {
         this.background = this.add.image(this.game.config.width, this.game.config.height, 'stage');
         this.background.setOrigin(1, 1);
-
+  
         const levelData = this.cache.json.get('levelData');
         const levelObjects = levelData.level.objects;
         const levelLayers = levelData.level.layers;
         const levelEntities = levelData.level.entities;
+
+        this.levelLength = levelData.length;
+
+        if (levelData.id === 0) {
+            let x = 0;
+            while (x < this.levelLength * this.caseSize) {
+                this.add.image(x, 0, 'backgroundObjects').setOrigin(0, 0);
+                x += 48 * this.caseSize;
+            }
+        }
 
         // Ajouter les couches du niveau
         this.createLayers(levelLayers);
@@ -67,17 +83,38 @@ export class Stage extends Phaser.Scene {
         // Ajouter la collision avec le sol
         this.physics.add.collider(this.player, this.ground);
         this.physics.add.collider(this.monsters, this.ground);
+        this.physics.add.collider(this.items, this.ground);
 
-        // Vérifier la collision du joueur avec les entités et les blocs
+        // Vérifier la collision du joueur avec les entités, les blocs et les objets
         this.physics.add.collider(this.player, this.blocks, (player, block) => {
             block.hitByPlayer(player);
         }, null, this);
         this.physics.add.collider(this.player, this.monsters, (player, monster) => {
             monster.hitByPlayer(player);
         }, null, this);
+        this.physics.add.collider(this.player, this.items, (player, item) => {
+            item.hitByPlayer(player);
+        }, null, this);
+
         this.physics.add.collider(this.monsters, this.blocks, (monster, block) => {
             monster.hitByBlock(block);
         }, null, this);
+        this.physics.add.collider(this.items, this.blocks, (item, block) => {
+            item.hitByBlock(block);
+        }, null, this);
+
+        const fontSize = 32;
+
+        //  Get the current highscore from the registry
+        const score = this.registry.get('highscore');
+        const coins = this.registry.get('coins');
+        const lives = this.registry.get('lives');
+
+        // Add bitmap text for score, time, and lives
+        this.scoreText = this.add.bitmapText(32, 32, 'MarioFont', `MARIO\n${score.toString().padStart(6, '0')}`, fontSize);
+        this.coinsText = this.add.bitmapText(512, 32, 'MarioFont', `COINS\n${coins.toString().padStart(3, '0')}`, fontSize).setOrigin(0.5, 0);
+        this.livesText = this.add.bitmapText(1024 - 32, 32, 'MarioFont', `LIVES\n${lives}`, fontSize).setOrigin(1, 0);
+
     }
 
     update() {
@@ -85,7 +122,6 @@ export class Stage extends Phaser.Scene {
 
         // Écouter l'événement de mise à jour de la scène
         this.events.on('update', this.updateCamera, this);
-        // this.events.on('update', this.updateBackground, this);
     }
 
     createObjects(objectsData) {
@@ -151,19 +187,15 @@ export class Stage extends Phaser.Scene {
             switch (layerType) {
                 case 'ground':
                     // Créer le sol
-                    const groundBoundsX = layerBounds.x;
-                    const groundBoundsY = layerBounds.y;
-                    const startX = groundBoundsX[0];
-                    const endX = groundBoundsX[1];
-                    const startY = groundBoundsY[0];
-                    const endY = groundBoundsY[1];
-                    // Créer des blocs de sol dans les plages spécifiées
-                    for (let x = startX; x <= endX; x++) {
-                        for (let y = startY; y <= endY; y++) {
-                            const block = new Block(this, x * this.caseSize, this.game.config.height - this.caseSize * y, "solid");
-                            this.ground.push(block);
+                    layerBounds.forEach(groundData => {
+                        const [x, y, width, height] = groundData;
+                        for (let i = x; i < x+width; i++) {
+                            for (let j = y; j < y+height; j++) {
+                                const block = new Block(this, i * this.caseSize, this.game.config.height - this.caseSize * j, "solid");
+                                this.ground.push(block);
+                            }
                         }
-                    }
+                    });
                     break;
                 case 'sky':
                     // Créer le ciel
@@ -176,6 +208,8 @@ export class Stage extends Phaser.Scene {
     }
 
     createEntities(entitiesData) {
+        let x;
+        let y;
         for (const entityType in entitiesData) {
             const entityArray = entitiesData[entityType];
             entityArray.forEach(entity => {
@@ -193,8 +227,8 @@ export class Stage extends Phaser.Scene {
                         this.blocks.push(randomBox);
                         break;
                     case 'pipe':
-                        const x = entity[0] * this.caseSize;
-                        const y = this.game.config.height - this.caseSize * entity[1];
+                        x = entity[0] * this.caseSize;
+                        y = this.game.config.height - this.caseSize * entity[1];
                         const length = entity[2]-1;
                         for (let i = 0; i < length; i++) {
                             this.blocks.push(new Block(this, x, y - i*this.caseSize, "pipe_3"));
@@ -202,6 +236,38 @@ export class Stage extends Phaser.Scene {
                         }
                         this.blocks.push(new Block(this, x, y - length*this.caseSize, "pipe_1"));
                         this.blocks.push(new Block(this, x + this.caseSize, y - length*this.caseSize, "pipe_2"));
+                        break;
+                    case 'stairs':
+                        x = entity[0] * this.caseSize;
+                        y = this.game.config.height - this.caseSize * entity[1];
+                        let width = entity[2];
+                        let height = entity[3];
+                        let direction = entity[4];
+                        if (direction === 'right') {
+                            for (let i = 0; i < width; i++) {
+                                if (i > height-1) {
+                                    for (let j = 0; j <= height-1; j++) {
+                                        this.blocks.push(new Block(this, x + i*this.caseSize, y - j*this.caseSize, "stairs"));
+                                    }
+                                } else {
+                                    for (let j = 0; j <= i; j++) {
+                                        this.blocks.push(new Block(this, x + i*this.caseSize, y - j*this.caseSize, "stairs"));
+                                    }
+                                }
+                            }
+                        } else {
+                            for (let i = 0; i < width; i++) {
+                                if (i > height-1) {
+                                    for (let j = 0; j <= height-1; j++) {
+                                        this.blocks.push(new Block(this, x + (width-i-1)*this.caseSize, y - j*this.caseSize, "stairs"));
+                                    }
+                                } else {
+                                    for (let j = 0; j <= i; j++) {
+                                        this.blocks.push(new Block(this, x + (width-i-1)*this.caseSize, y - j*this.caseSize, "stairs"));
+                                    }  
+                                }
+                            }
+                        }
                         break;
                     case 'goomba':
                         const goomba = new Monster(this, entity[0] * this.caseSize, this.game.config.height - this.caseSize * entity[1], "goomba");
@@ -232,6 +298,30 @@ export class Stage extends Phaser.Scene {
 
             // Déplacer le fond (background) avec la caméra
             this.background.x = this.cameras.main.scrollX + this.game.config.width;
+
+            // Mettre à jour les textes du score, des pièces et des vies
+            this.scoreText.x = this.cameras.main.scrollX + 32;
+            this.coinsText.x = this.cameras.main.scrollX + halfScreenWidth;
+            this.livesText.x = this.cameras.main.scrollX + this.game.config.width - 32;
         }
     }
+
+    addScore(points) {
+        const score = this.registry.get('highscore');
+        this.registry.set('highscore', score + points);
+        this.scoreText.setText(`MARIO\n${(score + points).toString().padStart(6, '0')}`);
+    }
+
+    addCoin() {
+        const coins = this.registry.get('coins');
+        this.registry.set('coins', coins + 1);
+        this.coinsText.setText(`COINS\n${(coins + 1).toString().padStart(3, '0')}`);
+    }
+
+    addLives(live) {
+        const lives = this.registry.get('lives');
+        this.registry.set('lives', lives + live);
+        this.livesText.setText(`LIVES\n${lives + live}`);
+    }
+
 }

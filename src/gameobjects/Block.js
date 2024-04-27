@@ -1,5 +1,8 @@
+import { Coin } from "./Coin";
+import { Item } from "./Item";
+
 export class Block extends Phaser.Physics.Arcade.Sprite {
-    constructor(scene, x, y, type, object) {
+    constructor(scene, x, y, type, item) {
         super(scene, x, y, "tiles");
         this.setup(type);
         this.setOrigin(0, 0);
@@ -44,6 +47,10 @@ export class Block extends Phaser.Physics.Arcade.Sprite {
                 this.setFrame(298);
                 this.breakable = false;
                 break;
+            case 'stairs':
+                this.setFrame(33);
+                this.breakable = false;
+                break;
             default:
                 this.setFrame(0);
                 this.breakable = false;
@@ -52,16 +59,30 @@ export class Block extends Phaser.Physics.Arcade.Sprite {
     }
     
     hitByPlayer(player) {
-        if (player.y > this.y + this.scene.caseSize) {
-            if (this.breakable) {
+        if (this.body.touching.down) {
+            if (this.blockType === 'brick') {
+                this.scene.addScore(50);
                 this.destroy();
             } else if (this.blockType === 'coinBox') {
                 this.setFrame(3);
+                this.blockType = 'emptyBox';
+                
+                const coin = new Coin(this.scene, this.x, this.y - this.scene.caseSize);
+                this.scene.coins.push(coin);
+
+                this.scene.addScore(200);
+                this.scene.addCoin();
+
             } else if (this.blockType === 'randomBox') {
                 this.setFrame(3);
+                this.blockType = 'emptyBox';
+
+                const item = new Item(this.scene, this.x, this.y - this.scene.caseSize, this.item);
+                this.scene.items.push(item);  
+
+                this.scene.addScore(1000);
             }
-        } 
-        
+        }  
     }
 
 }

@@ -9,7 +9,7 @@ import { Preloader } from './scenes/Preloader';
 const config = {
     type: Phaser.AUTO,
     width: 1024,
-    height: 768,
+    height: 960,
     parent: 'game-container',
     backgroundColor: '#FFFFFF',
     scale: {
@@ -19,7 +19,7 @@ const config = {
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 400 }
+            gravity: { y: 900 }
         }
     },
     scene: [

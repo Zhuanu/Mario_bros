@@ -7,15 +7,13 @@ export class GameOver extends Scene
         super('GameOver');
     }
 
+    preload() {
+        this.load.image('gameover', 'assets/gameover.png');
+    }
+
     create ()
     {
-        //  Get the current highscore from the registry
-
-        const textStyle = { fontFamily: 'Arial Black', fontSize: 64, color: '#ffffff', stroke: '#000000', strokeThickness: 8 };
-
-        this.cameras.main.setBackgroundColor('#000000');
-
-        this.add.text(512, 384, `Game Over\n`, textStyle).setAlign('center').setOrigin(0.5);
+        this.add.image(this.game.config.width/2, this.game.config.height/2, 'gameover');
 
         this.input.once('pointerdown', () => {
 
