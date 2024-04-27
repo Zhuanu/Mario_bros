@@ -66,17 +66,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
                 this.body.enable = true;
             }, [], this);
         } else {
-            this.isDead = true;
             this.die();
         }
     }
 
     update() {
-        if (this.y > this.scene.game.config.height) {
-            this.die();
-        }
-
         if (!this.isDead) {
+            if (this.y > this.scene.game.config.height) {
+                this.die();
+            }
             this.setVelocityX(0);
 
             if (this.body.touching.down) {
@@ -120,10 +118,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
                         this.isJumping = false;
                     }
                 }
-            }
-
-            if (this.y > this.scene.height) {
-                this.die();
             }
         }  
     }
@@ -193,29 +187,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     die() {
+        this.isDead = true;
+
         this.anims.play('mario_dead', true);
         this.scene.input.keyboard.enabled = false;
         this.setVelocityX(0);
         this.setVelocityY(-this.jump);
         this.setGravityY(800);
 
-        // Arrêter tous les monstres et objets
-        this.scene.monsters.forEach(monster => {
-            if (monster) {
-                monster.setVelocity(0);
-                monster.anims.stop();
-            }
-        });
-        this.scene.items.forEach(item => {
-            item.setVelocity(0);
-        });
-
         this.body.checkCollision.none = true;
 
-        this.scene.time.delayedCall(2000, () => {
-            this.scene.scene.start('GameOver');
-        }, [], this);
-
+        this.scene.removeLive();
     }
 
 }

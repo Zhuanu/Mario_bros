@@ -16,7 +16,7 @@ export class Stage extends Phaser.Scene {
 
         this.addScore = this.addScore.bind(this);
         this.addCoin = this.addCoin.bind(this);
-        this.addLives = this.addLives.bind(this);
+        this.removeLive = this.removeLive.bind(this);
     }
 
     preload() {
@@ -285,24 +285,32 @@ export class Stage extends Phaser.Scene {
     }
 
     updateCamera() {
-        // Calculer la position x de la moitié de l'écran
-        const halfScreenWidth = this.cameras.main.width / 2 ;
-    
-        // Vérifier si le joueur a dépassé la moitié de l'écran en x
-        if (this.player.x > halfScreenWidth) {
-            // Calculer le décalage en x pour suivre le joueur
-            const offsetX = this.player.x - halfScreenWidth;
-    
-            // Définir la position de la caméra pour suivre le joueur
-            this.cameras.main.setScroll(offsetX, 0);
+        // Calculer la position x de la fin de l'écran
+        const endScreenX = this.cameras.main.scrollX + this.cameras.main.width;
 
-            // Déplacer le fond (background) avec la caméra
-            this.background.x = this.cameras.main.scrollX + this.game.config.width;
+        // Vérifier si la fin de la scène est atteinte
+        if (endScreenX >= this.levelLength * this.caseSize) {
+            // Calculer le décalage en x pour aligner les éléments sur la fin de la scène
+            const offsetX = endScreenX - this.levelLength * this.caseSize;
 
-            // Mettre à jour les textes du score, des pièces et des vies
-            this.scoreText.x = this.cameras.main.scrollX + 32;
-            this.coinsText.x = this.cameras.main.scrollX + halfScreenWidth;
-            this.livesText.x = this.cameras.main.scrollX + this.game.config.width - 32;
+            // Définir la position de la caméra pour rester alignée avec la fin de la scène
+            this.cameras.main.setScroll(this.levelLength * this.caseSize - this.cameras.main.width, 0);
+
+            // Déplacer les éléments du score, des pièces et des vies pour les aligner sur la fin de la scène
+            this.scoreText.x = this.cameras.main.scrollX + 32 - offsetX;
+            this.coinsText.x = this.cameras.main.scrollX + this.cameras.main.width / 2 - offsetX;
+            this.livesText.x = this.cameras.main.scrollX + this.cameras.main.width - 32 - offsetX;
+        } else {
+            // Si la fin de la scène n'est pas atteinte, continuer à suivre le joueur
+            const halfScreenWidth = this.cameras.main.width / 2;
+            if (this.player.x > halfScreenWidth) {
+                const offsetX = this.player.x - halfScreenWidth;
+                this.cameras.main.setScroll(offsetX, 0);
+                this.background.x = this.cameras.main.scrollX + this.game.config.width;
+                this.scoreText.x = this.cameras.main.scrollX + 32;
+                this.coinsText.x = this.cameras.main.scrollX + halfScreenWidth;
+                this.livesText.x = this.cameras.main.scrollX + this.game.config.width - 32;
+            }
         }
     }
 
@@ -318,10 +326,19 @@ export class Stage extends Phaser.Scene {
         this.coinsText.setText(`COINS\n${(coins + 1).toString().padStart(3, '0')}`);
     }
 
-    addLives(live) {
+    removeLive() {
         const lives = this.registry.get('lives');
-        this.registry.set('lives', lives + live);
-        this.livesText.setText(`LIVES\n${lives + live}`);
+        this.registry.set('lives', lives - 1);
+        this.livesText.setText(`LIVES\n${lives - 1}`);
+
+        this.time.delayedCall(2000, () => {
+            if (lives === 1) {
+                this.scene.start('GameOver');
+                this.registry.set('lives', 3);
+            } else {
+                this.scene.restart();
+            }
+        }, [], this);
     }
 
 }
