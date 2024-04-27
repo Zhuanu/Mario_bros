@@ -19,7 +19,7 @@ export class Coin extends Phaser.Physics.Arcade.Sprite {
                     { key: 'items', frame: 255 },
                     { key: 'items', frame: 256 }
                 ],
-                frameRate: 10,
+                frameRate: 20,
                 repeat: -1
             });
         }
@@ -27,11 +27,11 @@ export class Coin extends Phaser.Physics.Arcade.Sprite {
         this.anims.play('coinJump', true);
 
         // Faire sauter la pièce dès sa création
-        this.body.setVelocityY(-800);
+        this.body.setVelocityY(-600);
 
         // Faire disparaître la pièce après un délai
         setTimeout(() => {
             this.destroy();
-        }, 800);
+        }, 600);
     }
 }

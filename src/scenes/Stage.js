@@ -1,6 +1,5 @@
 import { Player } from '../gameobjects/Player';
 import { Block } from '../gameobjects/Block';
-import { BackgroundObject } from '../gameobjects/BackgroundObject';
 import { Monster } from '../gameobjects/Monster';
 
 export class Stage extends Phaser.Scene {
@@ -10,9 +9,9 @@ export class Stage extends Phaser.Scene {
         this.ground = [];
         this.blocks = [];
         this.monsters = [];
+        this.koopas = [];
         this.items = [];
         this.coins = [];
-        this.backgroundObjects = [];
 
         this.addScore = this.addScore.bind(this);
         this.addCoin = this.addCoin.bind(this);
@@ -25,7 +24,7 @@ export class Stage extends Phaser.Scene {
 
         this.load.image('stage', 'assets/background_stage.png');
         this.load.image('backgroundObjects', 'assets/img/backgroundObjects.png');
-
+        
         this.load.spritesheet('tiles', 'assets/img/tiles.png', {
             frameWidth: 64,
             frameHeight: 64
@@ -36,17 +35,14 @@ export class Stage extends Phaser.Scene {
         }); 
         this.load.spritesheet('monsters', 'assets/img/monsters.png', {
             frameWidth: 64,
-            frameHeight: 64
+            frameHeight: 128
         });
         this.load.spritesheet('items', 'assets/img/items.png', {
             frameWidth: 64,
             frameHeight: 64
         });
 
-        this.load.json('backgroundSprites', 'assets/sprites/BackgroundSprites.json');
         this.load.json('marioAnimations', 'assets/sprites/Mario.json');
-        this.load.json('goombaAnimations', 'assets/sprites/Goomba.json');
-        
     }
 
     create() {
@@ -54,7 +50,6 @@ export class Stage extends Phaser.Scene {
         this.background.setOrigin(1, 1);
   
         const levelData = this.cache.json.get('levelData');
-        const levelObjects = levelData.level.objects;
         const levelLayers = levelData.level.layers;
         const levelEntities = levelData.level.entities;
 
@@ -70,9 +65,6 @@ export class Stage extends Phaser.Scene {
 
         // Ajouter les couches du niveau
         this.createLayers(levelLayers);
-
-        // Ajouter le décor du niveau
-        this.createObjects(levelObjects);
 
         // Ajouter les entités du niveau
         this.createEntities(levelEntities);
@@ -103,6 +95,10 @@ export class Stage extends Phaser.Scene {
             item.hitByBlock(block);
         }, null, this);
 
+        this.physics.add.collider(this.koopas, this.monsters, (koopa, monster) => {
+            koopa.hitByMonster(monster);
+        }, null, this);
+
         const fontSize = 32;
 
         //  Get the current highscore from the registry
@@ -120,65 +116,15 @@ export class Stage extends Phaser.Scene {
     update() {
         this.player.update();
 
+        for (const monster of this.monsters) {
+            if (!monster.active && this.isEntityWithinCamera(monster)) {
+                monster.setVelocityX(monster.velocity);
+                monster.active = true;
+            }
+        }
+
         // Écouter l'événement de mise à jour de la scène
         this.events.on('update', this.updateCamera, this);
-    }
-
-    createObjects(objectsData) {
-        for (const objectType in objectsData) {
-            const objectArray = objectsData[objectType];
-            objectArray.forEach(object => {
-                const x = object[0] * this.caseSize;
-                const y = this.game.config.height - this.caseSize * object[1];
-                switch (objectType) {
-                    case 'hill':
-                        this.backgroundObjects.push(new BackgroundObject(this, x, y, "hill_1"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x + this.caseSize, y, "hill_4"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x + 2*this.caseSize, y, "hill_3"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x + this.caseSize, y - this.caseSize, "hill_2"));
-                        break;
-                    case 'bigHill':
-                        this.backgroundObjects.push(new BackgroundObject(this, x, y, "hill_1"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x + this.caseSize, y, "hill_4"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x + 2*this.caseSize, y, "hill_5"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x + 3*this.caseSize, y, "hill_6"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x + 4*this.caseSize, y, "hill_3"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x + this.caseSize, y - this.caseSize, "hill_1"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x + 2*this.caseSize, y - this.caseSize, "hill_5"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x + 3*this.caseSize, y - this.caseSize, "hill_3"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x + 2*this.caseSize, y - 2*this.caseSize, "hill_2"));
-                        break;
-                    case 'oneBush' :
-                        this.backgroundObjects.push(new BackgroundObject(this, x - this.caseSize, y, "bush_1"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x, y, "bush_2"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x + this.caseSize, y, "bush_3"));
-                        break;
-                    case 'twoBush' :
-                        this.backgroundObjects.push(new BackgroundObject(this, x - this.caseSize, y, "bush_1"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x, y, "bush_2"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x + this.caseSize, y, "bush_2"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x + 2 * this.caseSize, y, "bush_3"));
-                        break;
-                    case 'threeBush' :
-                        this.backgroundObjects.push(new BackgroundObject(this, x - this.caseSize, y, "bush_1"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x, y, "bush_2"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x + this.caseSize, y, "bush_2"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x + 2 * this.caseSize, y, "bush_2"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x + 3 * this.caseSize, y, "bush_3"));
-                        break;
-                    case 'oneCloud':
-                        this.backgroundObjects.push(new BackgroundObject(this, x - this.caseSize, y , "cloud_4"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x, y, "cloud_5"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x + this.caseSize, y, "cloud_6"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x - this.caseSize, y - this.caseSize, "cloud_1"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x, y - this.caseSize, "cloud_2"));
-                        this.backgroundObjects.push(new BackgroundObject(this, x + this.caseSize, y - this.caseSize, "cloud_3"));
-                        break;
-                    default:
-                        break;
-                }
-            });
-        }
     }
 
     createLayers(layersData) {
@@ -274,8 +220,9 @@ export class Stage extends Phaser.Scene {
                         this.monsters.push(goomba);
                         break;
                     case 'koopa':
-                        // Créer des Koopas
-                        // ...
+                        const koopa = new Monster(this, entity[0] * this.caseSize, this.game.config.height - this.caseSize * entity[1], "koopa");
+                        this.monsters.push(koopa);
+                        this.koopas.push(koopa);
                         break;
                     default:
                         break;
@@ -314,6 +261,15 @@ export class Stage extends Phaser.Scene {
         }
     }
 
+    isEntityWithinCamera(entity) {
+        // Récupérer la position horizontale de la caméra et sa largeur
+        const cameraX = this.cameras.main.scrollX;
+        const cameraWidth = this.cameras.main.width;
+
+        // Vérifier si l'entité est à l'intérieur de la zone visible de la caméra
+        return (entity.x >= cameraX && entity.x <= cameraX + cameraWidth);
+    }
+
     addScore(points) {
         const score = this.registry.get('highscore');
         this.registry.set('highscore', score + points);
@@ -333,12 +289,33 @@ export class Stage extends Phaser.Scene {
 
         this.time.delayedCall(2000, () => {
             if (lives === 1) {
+                this.removeScene();
                 this.scene.start('GameOver');
                 this.registry.set('lives', 3);
             } else {
-                this.scene.restart();
+                this.removeScene();
+                this.create();
             }
         }, [], this);
+    }
+
+    removeScene() {
+        // Supprimer tous les objets de la scène
+        this.ground.forEach(ground => ground.destroy());
+        this.blocks.forEach(block => block.destroy());
+        this.monsters.forEach(monster => monster.destroy());
+        this.koopas.forEach(koopa => koopa.destroy());
+        this.items.forEach(item => item.destroy());
+        this.player.destroy();
+
+        // Vider les listes d'objets
+        this.ground = [];
+        this.blocks = [];
+        this.monsters = [];
+        this.koopas = [];
+        this.items = [];
+
+        this.cameras.main.scrollX = 0;
     }
 
 }
