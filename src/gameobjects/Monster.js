@@ -69,6 +69,7 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
         if (this.body.touching.up) {   
             // Faire sauter le joueur
             player.setVelocityY(-player.jump);
+            player.isJumping = true;
 
             if (this.monsterType === 'goomba') {
                 this.setVelocityX(0);
@@ -83,6 +84,7 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
                     this.scene.monsters.splice(index, 1);
                     this.destroy();
                 }, this);
+                
             } else if (this.monsterType === 'koopa') {
                 this.monsterType = 'koopa-shell';
                 this.setVelocityX(0);

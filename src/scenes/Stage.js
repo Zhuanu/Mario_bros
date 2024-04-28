@@ -1,5 +1,6 @@
 import { Player } from '../gameobjects/Player';
 import { Block } from '../gameobjects/Block';
+import { Item } from '../gameobjects/Item';
 import { Monster } from '../gameobjects/Monster';
 
 export class Stage extends Phaser.Scene {
@@ -24,6 +25,7 @@ export class Stage extends Phaser.Scene {
 
         this.load.image('stage', 'assets/background_stage.png');
         this.load.image('backgroundObjects', 'assets/img/backgroundObjects.png');
+        this.load.image('endCastle', 'assets/img/endCastle.png');
         
         this.load.spritesheet('tiles', 'assets/img/tiles.png', {
             frameWidth: 64,
@@ -54,6 +56,7 @@ export class Stage extends Phaser.Scene {
         const levelEntities = levelData.level.entities;
 
         this.levelLength = levelData.length;
+        this.endOfLevel = false;
 
         if (levelData.id === 0) {
             let x = 0;
@@ -63,6 +66,8 @@ export class Stage extends Phaser.Scene {
             }
         }
 
+        this.add.image(this.levelLength * this.caseSize, 0, 'endCastle').setOrigin(1, 0);
+
         // Ajouter les couches du niveau
         this.createLayers(levelLayers);
 
@@ -71,6 +76,7 @@ export class Stage extends Phaser.Scene {
 
         // Ajouter le joueur
         this.player = new Player(this, 100, this.game.config.height - 192);
+        this.input.keyboard.resetKeys();
 
         // Ajouter la collision avec le sol
         this.physics.add.collider(this.player, this.ground);
@@ -101,7 +107,7 @@ export class Stage extends Phaser.Scene {
 
         const fontSize = 32;
 
-        //  Get the current highscore from the registry
+        // Get the current highscore from the registry
         const score = this.registry.get('highscore');
         const coins = this.registry.get('coins');
         const lives = this.registry.get('lives');
@@ -115,7 +121,14 @@ export class Stage extends Phaser.Scene {
 
     update() {
         this.player.update();
+        if (this.player.x < 0) {
+            this.player.x = 0;
+        }
+        if (!this.endOfLevel && this.player.x > (this.levelLength - 13)*this.caseSize) {
+            this.endLevel();
+        }
 
+        // Activer les monstres lorsqu'ils sont dans la zone visible de la caméra
         for (const monster of this.monsters) {
             if (!monster.active && this.isEntityWithinCamera(monster)) {
                 monster.setVelocityX(monster.velocity);
@@ -137,15 +150,11 @@ export class Stage extends Phaser.Scene {
                         const [x, y, width, height] = groundData;
                         for (let i = x; i < x+width; i++) {
                             for (let j = y; j < y+height; j++) {
-                                const block = new Block(this, i * this.caseSize, this.game.config.height - this.caseSize * j, "solid");
+                                const block = new Block(this, i * this.caseSize, this.game.config.height - this.caseSize * j, "ground");
                                 this.ground.push(block);
                             }
                         }
                     });
-                    break;
-                case 'sky':
-                    // Créer le ciel
-                    // ...
                     break;
                 default:
                     break;
@@ -229,6 +238,10 @@ export class Stage extends Phaser.Scene {
                 }
             });
         }
+
+        // Ajouter le drapeau de fin de niveau
+        this.blocks.push(new Block(this, (this.levelLength - 13)*this.caseSize, this.game.config.height - this.caseSize*3, "stairs"));
+        this.items.push(new Item(this, (this.levelLength - 13)*this.caseSize - 32, this.game.config.height - this.caseSize*12, "flag"));  
     }
 
     updateCamera() {
@@ -316,6 +329,23 @@ export class Stage extends Phaser.Scene {
         this.items = [];
 
         this.cameras.main.scrollX = 0;
+    }
+
+    endLevel() {
+        this.endOfLevel = true;
+        this.input.keyboard.enabled = false;
+        this.input.keyboard.resetKeys();
+        this.player.setVelocityX(0);
+        this.time.delayedCall(1500, () => {
+            console.log(this.player.speed);
+            this.player.cursors.right.isDown = true;
+        }, [], this);
+        this.time.delayedCall(2400, () => {
+            this.player.alpha = 0;
+        }, [], this);
+        this.time.delayedCall(3400, () => {
+            this.scene.start('Win');
+        }, [], this);
     }
 
 }

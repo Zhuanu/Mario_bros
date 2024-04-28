@@ -19,6 +19,10 @@ export class Block extends Phaser.Physics.Arcade.Sprite {
     setup(type) {
         this.blockType = type;
         switch (type) {
+            case 'ground':
+                this.setFrame(0);
+                this.breakable = false;
+                break;
             case 'brick':
                 this.setFrame(2);
                 this.breakable = true;
@@ -29,6 +33,10 @@ export class Block extends Phaser.Physics.Arcade.Sprite {
                 break;
             case 'randomBox':
                 this.setFrame(24);
+                this.breakable = false;
+                break;
+            case 'emptyBox':
+                this.setFrame(3);
                 this.breakable = false;
                 break;
             case 'pipe_1':
@@ -52,7 +60,7 @@ export class Block extends Phaser.Physics.Arcade.Sprite {
                 this.breakable = false;
                 break;
             default:
-                this.setFrame(0);
+                this.setFrame(32);
                 this.breakable = false;
                 break;
         }
@@ -77,12 +85,14 @@ export class Block extends Phaser.Physics.Arcade.Sprite {
                 this.setFrame(3);
                 this.blockType = 'emptyBox';
 
-                const item = new Item(this.scene, this.x, this.y - this.scene.caseSize, this.item);
+                const item = new Item(this.scene, this.x, this.y - this.scene.caseSize, "RedMushroom");
                 this.scene.items.push(item);  
 
                 this.scene.addScore(1000);
             }
-        }  
+        } else if (this.blockType.slice(0, -1) === 'pipe_') {
+            player.y += 3;
+        }
     }
 
 }

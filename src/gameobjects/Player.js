@@ -43,9 +43,16 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     makeBig() {
         if (!this.isBig) {
             this.isBig = true;
+            if (this.isBig) {
+                if (this.direction === 'right') {
+                    this.anims.play('mario_big_jump', true);
+                } else {
+                    this.anims.play('mario_big_jump2', true);
+                }
+            } 
             this.setSize(64, 128);
             this.setOffset(0, 0);
-            this.setPosition(this.x, this.y - this.scene.caseSize);
+            this.setPosition(this.x, this.y - this.scene.caseSize); 
         }
     }
 
@@ -101,7 +108,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
             } else {
                 if (this.isJumping)
                     this.playJumpAnimation();
-                
+
                 // Déterminer la direction
                 if (this.cursors.left.isDown) {
                     this.setVelocityX(-this.speed / 1.5);
@@ -110,13 +117,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
                     this.setVelocityX(this.speed / 1.5);
                     this.direction = 'right';
                 }
-
+                
                 if (this.cursors.space.isDown && this.isJumping) {
                     this.jumpTimer++;
                     if (this.jumpTimer > 25) {
                         this.setVelocityY(-this.bigJump);
                         this.isJumping = false;
                     }
+                } else {
+                    this.isJumping = false;
                 }
             }
         }  
