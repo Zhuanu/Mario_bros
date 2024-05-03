@@ -77,10 +77,12 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
                 this.anims.stop();
                 this.setFrame(2);
 
+                this.body.checkCollision.up = false; // Pour éviter que le joueur rebondisse encore une fois sur le monstre
+
                 this.scene.addScore(100);
 
                 // Faire disparaître le monstre après un court délai
-                this.scene.time.delayedCall(150, () => {
+                this.scene.time.delayedCall(300, () => {
                     const index = this.scene.monsters.indexOf(this);
                     this.scene.monsters.splice(index, 1);
                     this.destroy();
