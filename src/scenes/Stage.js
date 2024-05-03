@@ -240,7 +240,7 @@ export class Stage extends Phaser.Scene {
                                 if (i > height-1) {
                                     for (let j = 0; j <= height-1; j++) {
                                         stair = new Block(this, x + i*this.caseSize, y - j*this.caseSize, "stairs");
-                                        stair.body.checkCollision.up = (j === i); // Désactiver la collision avec le haut pour éviter que Mario ne reste bloqué
+                                        stair.body.checkCollision.up = (j === height-1); // Désactiver la collision avec le haut pour éviter que Mario ne reste bloqué
                                         this.blocks.push(stair);
                                     }
                                 } else {
@@ -255,11 +255,15 @@ export class Stage extends Phaser.Scene {
                             for (let i = 0; i < width; i++) {
                                 if (i > height-1) {
                                     for (let j = 0; j <= height-1; j++) {
-                                        this.blocks.push(new Block(this, x + (width-i-1)*this.caseSize, y - j*this.caseSize, "stairs"));
+                                        stair = new Block(this, x + (width-i-1)*this.caseSize, y - j*this.caseSize, "stairs");
+                                        stair.body.checkCollision.up = (j === height-1); // Désactiver la collision avec le haut pour éviter que Mario ne reste bloqué
+                                        this.blocks.push(stair);
                                     }
                                 } else {
                                     for (let j = 0; j <= i; j++) {
-                                        this.blocks.push(new Block(this, x + (width-i-1)*this.caseSize, y - j*this.caseSize, "stairs"));
+                                        stair = new Block(this, x + (width-i-1)*this.caseSize, y - j*this.caseSize, "stairs");
+                                        stair.body.checkCollision.up = (j === i);
+                                        this.blocks.push(stair);
                                     }  
                                 }
                             }
