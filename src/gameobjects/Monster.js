@@ -79,7 +79,7 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
                 this.scene.addScore(100);
 
                 // Faire disparaître le monstre après un court délai
-                this.scene.time.delayedCall(400, () => {
+                this.scene.time.delayedCall(150, () => {
                     const index = this.scene.monsters.indexOf(this);
                     this.scene.monsters.splice(index, 1);
                     this.destroy();
