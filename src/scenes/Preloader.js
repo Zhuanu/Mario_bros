@@ -6,7 +6,7 @@ export class Preloader extends Scene {
     }
 
     init() {
-        //  We loaded this image in our Boot Scene, so we can display it here
+        // Ajouter l'image de préchargement
         this.add.image(this.game.config.width/2, this.game.config.height/2, 'preloader');
     }
 
@@ -28,7 +28,5 @@ export class Preloader extends Scene {
                 this.cameras.main.setAlpha( - progress);
             }
         });
-
-        //  When the transition completes, it will move automatically to the MainMenu scene
     }
 }

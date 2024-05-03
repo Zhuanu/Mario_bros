@@ -41,7 +41,8 @@ export class Item extends Phaser.Physics.Arcade.Sprite {
             player.makeBig();
             this.destroy();
         } else if (this.blockType === 'flag') {
-            this.breakable = true;
+            this.body.allowGravity = true;
+            player.body.checkCollision.up = false;
         }
     }
 

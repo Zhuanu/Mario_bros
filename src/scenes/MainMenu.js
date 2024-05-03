@@ -9,9 +9,8 @@ export class MainMenu extends Scene
 
     create ()
     {
-        //  Get the current highscore from the registry
+        // Récupérer les valeurs du registre
         const score = this.registry.get('highscore');
-        const time = this.registry.get('time');
         const coins = this.registry.get('coins');
         const lives = this.registry.get('lives');
 
@@ -27,7 +26,7 @@ export class MainMenu extends Scene
 
         const fontSize = 32;
 
-        // Add bitmap text for score, time, and lives
+        // Afficher les valeurs du registre
         this.add.bitmapText(32, 32, 'MarioFont', `MARIO\n ${score}`, fontSize);
         this.add.bitmapText(512, 32, 'MarioFont', `COINS\n ${coins}`, fontSize).setOrigin(0.5, 0);
         this.add.bitmapText(1024 - 32, 32, 'MarioFont', `LIVES: ${lives}`, fontSize).setOrigin(1, 0);

@@ -70,6 +70,7 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
             // Faire sauter le joueur
             player.setVelocityY(-player.jump);
             player.isJumping = true;
+            this.scene.stompSfx.play();
 
             if (this.monsterType === 'goomba') {
                 this.setVelocityX(0);
@@ -107,6 +108,7 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
     }
 
     hitByBlock(block) {
+        // Si le monstre touche un bloc, il change de direction
         if (this.body.touching.left || this.body.touching.right) {
             this.velocity = -this.velocity;
             this.setVelocityX(this.velocity);
@@ -114,6 +116,7 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
     }
 
     hitByMonster(monster) {
+        // La carapace de Koopa tue les autres monstres
         this.setVelocityX(this.velocity);
         this.scene.addScore(200);
         const index = this.scene.monsters.indexOf(monster);
