@@ -10,9 +10,8 @@ export class Boot extends Scene {
     }
 
     create () {
-        //  A global value to store the highscore in
+        // Initialiser les valeurs du registre
         this.registry.set('highscore', 0);
-        this.registry.set('time', 500);
         this.registry.set('coins', 0);
         this.registry.set('lives', 3);
 

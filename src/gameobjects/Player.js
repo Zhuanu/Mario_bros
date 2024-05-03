@@ -4,24 +4,25 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
+        // Configurer la physique du joueur
         this.speed = 460;
         this.jump = 700;
         this.bigJump = 805;
-
         this.setBounce(0);
         this.setGravityY(800);
 
-        // Charger les animations à partir du fichier JSON
         this.loadAnimations(scene);
+
+        // Configurer les touches du clavier
         this.cursors = scene.input.keyboard.createCursorKeys();
         this.scene.input.keyboard.enabled = true;
+        
+        // Configurer les propriétés du joueur à la création
+        this.makeSmall(); // Mario commence petit
         this.direction = 'right';
         this.isDead = false;
-
-        this.makeSmall();
-
         this.jumpTimer = 0; // Timer pour mesurer la durée de maintien de la touche de saut
-        this.isJumping = false; // Indicateur de saut en cours
+        this.isJumping = false;
     }
 
     loadAnimations(scene) {
@@ -43,6 +44,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     makeBig() {
         if (!this.isBig) {
             this.isBig = true;
+            this.scene.powerUpSfx.play();
             if (this.isBig) {
                 if (this.direction === 'right') {
                     this.anims.play('mario_big_jump', true);
@@ -68,6 +70,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         if (this.isBig) {
             this.body.enable = false;
             this.makeSmall();
+            // Rendre Mario invincible pendant 2 secondes
             this.scene.time.delayedCall(200, () => {
                 this.alpha = 1;
                 this.body.enable = true;
@@ -79,9 +82,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     update() {
         if (!this.isDead) {
+            // Vérifier si Mario est tombé dans un trou
             if (this.y > this.scene.game.config.height) {
                 this.die();
             }
+
             this.setVelocityX(0);
 
             if (this.body.touching.down) {
@@ -100,6 +105,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
                 // Sauter
                 if (this.cursors.space.isDown) {
+                    this.scene.jumpSfx.play();
                     this.isJumping = true;
                     this.jumpTimer = 0;
                     this.setVelocityY(-this.jump);
@@ -110,14 +116,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
                     this.playJumpAnimation();
 
                 // Déterminer la direction
-                if (this.cursors.left.isDown) {
+                if (this.cursors.left.isDown && !this.body.touching.left) {
                     this.setVelocityX(-this.speed / 1.5);
                     this.direction = 'left';
-                } else if (this.cursors.right.isDown) {
+                } else if (this.cursors.right.isDown && !this.body.touching.right) {
                     this.setVelocityX(this.speed / 1.5);
                     this.direction = 'right';
                 }
                 
+                // Sauter plus haut
                 if (this.cursors.space.isDown && this.isJumping) {
                     this.jumpTimer++;
                     if (this.jumpTimer > 25) {
@@ -198,8 +205,12 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     die() {
         this.isDead = true;
 
+        this.scene.music.stop();
+        this.scene.deathSfx.play();
+
         this.anims.play('mario_dead', true);
-        this.scene.input.keyboard.enabled = false;
+        this.scene.input.keyboard.resetKeys();
+        
         this.setVelocityX(0);
         this.setVelocityY(-this.jump);
         this.setGravityY(800);

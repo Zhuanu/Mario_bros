@@ -69,9 +69,11 @@ export class Block extends Phaser.Physics.Arcade.Sprite {
     hitByPlayer(player) {
         if (this.body.touching.down) {
             if (this.blockType === 'brick') {
+                this.scene.breakBlockSfx.play()
                 this.scene.addScore(50);
                 this.destroy();
             } else if (this.blockType === 'coinBox') {
+                this.scene.coinSfx.play();
                 this.setFrame(3);
                 this.blockType = 'emptyBox';
                 
@@ -80,8 +82,8 @@ export class Block extends Phaser.Physics.Arcade.Sprite {
 
                 this.scene.addScore(200);
                 this.scene.addCoin();
-
             } else if (this.blockType === 'randomBox') {
+                this.scene.powerUpAppearSfx.play();
                 this.setFrame(3);
                 this.blockType = 'emptyBox';
 
@@ -89,9 +91,9 @@ export class Block extends Phaser.Physics.Arcade.Sprite {
                 this.scene.items.push(item);  
 
                 this.scene.addScore(1000);
+            } else if (this.blockType === 'emptyBox') {
+                this.scene.brickBumpSfx.play();
             }
-        } else if (this.blockType.slice(0, -1) === 'pipe_') {
-            player.y += 3;
         }
     }
 
